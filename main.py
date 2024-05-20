@@ -1,6 +1,7 @@
 from pygame import *
 import random
 
+font.init()
 #! Размер клетки 30 на 30 пикселей
 
 class GameSprite(sprite.Sprite):
@@ -48,10 +49,10 @@ h = 30
 snake_speed_x = 30
 snake_speed_y = 0
 
-snake_head = Snake("snake_head.png", w,h,30,30,0,0)
-snake_tail = Snake("snake_hull.png", w,h,0,30,snake_speed_x,snake_speed_y)
-
+snake_tail = Snake("snake_hull.png", w,h,0,30,0,0)
 snake_list = []
+length = 1
+
 snake_list.append(snake_tail)
 
 #Яблоки
@@ -61,6 +62,11 @@ foody = round(random.randrange(0,width - 30)/ 30.0) * 30.0
 apple = Apple("apple.png", 30,30,0,0)
 apple_list = []
 apple_list.append(apple)
+
+count = 0
+
+f1 = font.Font(None, 50)
+ext1 = f1.render('Game Over', 1, (255, 255, 0))
 
 play = True
 while play:
@@ -88,30 +94,30 @@ while play:
                 snake_speed_y = 0
                 snake_speed_x = 30
 
-    snake_head.x_speed = snake_speed_x
-    snake_head.y_speed = snake_speed_y
-    snake_head.draw()
-    snake_head.update()
+    counter = f1.render('Score: '+str(count), 1,(255, 255, 0))
+    window.blit(counter, (0,0))
 
     for a in snake_list:
         a.draw()
         a.update()
         a.x_speed = snake_speed_x
         a.y_speed = snake_speed_y
+        if a.rect.x < 0 or a.rect.x > 600 or a.rect.y < 0 or a.rect.y > 600:
+            window.blit(ext1, (220,300))
 
-    if snake_head.rect.x < 0 or snake_head.rect.x > 600 or snake_head.rect.y < 0 or snake_head.rect.y > 600:
-        play = False
 
     for i in apple_list:
         i.spawn(foodx,foody)
-        if snake_head.rect.x == foodx and snake_head.rect.y == foody:
+        if snake_tail.rect.x == foodx and snake_tail.rect.y == foody:
             apple_list.remove(i)
-            snake_list.append(snake_tail)
+            length += 1
+            count += 1
             foodx = round(random.randrange(0,height - 30)/ 30.0) * 30.0
             foody = round(random.randrange(0,width - 30)/ 30.0) * 30.0
             apple_list.append(apple)
 
-
+    if len(snake_list) < length:
+        snake_list.append(snake_tail)
 
     display.update()
     clock.tick(5)
