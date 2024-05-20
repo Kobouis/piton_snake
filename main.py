@@ -1,4 +1,5 @@
 from pygame import *
+import random
 
 #! Размер клетки 30 на 30 пикселей
 
@@ -22,18 +23,17 @@ class Snake(GameSprite):
     def update(self):
         if self.rect.x >= 0 and self.rect.x <= 600:
             self.rect.x += self.x_speed
-        elif self.rect.x < 0:
-            self.rect.x = 0
-        elif self.rect.x > 600:
-            self.rect.x = 570
         
         if self.rect.y >= 0 and self.rect.y <= 600:
             self.rect.y += self.y_speed
-        elif self.rect.y < 0:
-            self.rect.y = 0
-        elif self.rect.y > 600:
-            self.rect.y = 570
-                
+
+class Apple(GameSprite):
+    def __init__(self, picture, w, h, x, y):
+            GameSprite.__init__(self, picture, w, h, x, y)
+
+    def spawn(self,foodx,foody):
+        window.blit(self.image, (foodx,foody))
+
 # Размеры экрана 600 на 600
 width = 600
 height = 600
@@ -47,9 +47,20 @@ w = 30
 h = 30
 snake_speed_x = 30
 snake_speed_y = 0
-snake_head = Snake("snake_right.png", w,h,30,30,0,0)
+
+snake_head = Snake("snake_head.png", w,h,30,30,0,0)
+snake_tail = Snake("snake_hull.png", w,h,0,30,snake_speed_x,snake_speed_y)
+
+snake_list = []
+snake_list.append(snake_tail)
 
 #Яблоки
+foodx = round(random.randrange(0,height - 30)/ 30.0) * 30.0
+foody = round(random.randrange(0,width - 30)/ 30.0) * 30.0
+
+apple = Apple("apple.png", 30,30,0,0)
+apple_list = []
+apple_list.append(apple)
 
 play = True
 while play:
@@ -76,12 +87,31 @@ while play:
             if e.key == K_d:
                 snake_speed_y = 0
                 snake_speed_x = 30
-    
+
     snake_head.x_speed = snake_speed_x
     snake_head.y_speed = snake_speed_y
-
     snake_head.draw()
     snake_head.update()
+
+    for a in snake_list:
+        a.draw()
+        a.update()
+        a.x_speed = snake_speed_x
+        a.y_speed = snake_speed_y
+
+    if snake_head.rect.x < 0 or snake_head.rect.x > 600 or snake_head.rect.y < 0 or snake_head.rect.y > 600:
+        play = False
+
+    for i in apple_list:
+        i.spawn(foodx,foody)
+        if snake_head.rect.x == foodx and snake_head.rect.y == foody:
+            apple_list.remove(i)
+            snake_list.append(snake_tail)
+            foodx = round(random.randrange(0,height - 30)/ 30.0) * 30.0
+            foody = round(random.randrange(0,width - 30)/ 30.0) * 30.0
+            apple_list.append(apple)
+
+
 
     display.update()
     clock.tick(5)
